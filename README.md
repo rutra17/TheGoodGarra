@@ -34,17 +34,6 @@ O diferencial deste projeto é o uso de **Cinemática Inversa com Null Space** (
 
 ---
 
-## 📸 Visualização
-
-|                        Simulação Física (PyBullet)                        |                      Dashboard de Controle (Node-RED)                     |
-| :-----------------------------------------------------------------------: | :-----------------------------------------------------------------------: |
-| <img src="docs/print_simulacao.png" alt="Simulação PyBullet" width="400"> | <img src="docs/print_dashboard.png" alt="Dashboard Node-RED" width="400"> |
-|                    *Ambiente de triagem com Kuka IIWA*                    |                    *Controle e Métricas em Tempo Real*                    |
-
-> *Dica: Substitua as imagens acima pelos seus prints ou GIFs na pasta `docs/`.*
-
----
-
 ## 📂 Estrutura do Projeto
 
 ```text
@@ -115,7 +104,7 @@ O sistema calcula e transmite as seguintes métricas a cada ciclo de supervisão
 
 ## 👨‍💻 Autor
 
-Desenvolvido por **Artur** para a disciplina de Robótica Computacional.
+Desenvolvido por **Artur**, **Bruno**, **Gabriel**, **Henrique** e **Yago** para a disciplina de Robótica Computacional.
 
 * *Focado em Código Limpo, Arquitetura Modular e Integração IoT.*
 
