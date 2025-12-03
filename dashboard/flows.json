@@ -1,0 +1,402 @@
+[
+    {
+        "id": "tab_arm",
+        "type": "tab",
+        "label": "Controle Braço Robótico 1A",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "http_in_arm",
+        "type": "http in",
+        "z": "tab_arm",
+        "name": "Recebe Dados Garra",
+        "url": "/dados-robo-garra",
+        "method": "post",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 140,
+        "wires": [
+            [
+                "json_debug",
+                "split_metrics",
+                "split_state",
+                "process_command"
+            ]
+        ]
+    },
+    {
+        "id": "http_resp_arm",
+        "type": "http response",
+        "z": "tab_arm",
+        "name": "Resposta Comando",
+        "statusCode": "200",
+        "headers": {},
+        "x": 650,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "process_command",
+        "type": "function",
+        "z": "tab_arm",
+        "name": "Anexar Comando",
+        "func": "var ligar = flow.get('arm_active') || false;\nmsg.payload = {\n    \"comando\": ligar ? \"ligar\" : \"desligar\"\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 80,
+        "wires": [
+            [
+                "http_resp_arm"
+            ]
+        ]
+    },
+    {
+        "id": "switch_arm",
+        "type": "ui_switch",
+        "z": "tab_arm",
+        "name": "Ativar Sistema",
+        "label": "ACIONAMENTO GERAL",
+        "tooltip": "Liga/Desliga a simulação do braço",
+        "group": "grp_arm_control",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": true,
+        "className": "",
+        "x": 140,
+        "y": 400,
+        "wires": [
+            [
+                "save_state_arm"
+            ]
+        ]
+    },
+    {
+        "id": "save_state_arm",
+        "type": "change",
+        "z": "tab_arm",
+        "name": "Salvar Estado",
+        "rules": [
+            {
+                "t": "set",
+                "p": "arm_active",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 340,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "split_metrics",
+        "type": "function",
+        "z": "tab_arm",
+        "name": "Extrair Métricas",
+        "func": "var error = { payload: msg.payload.metrics.error, topic: \"Erro Posição (m)\" };\nvar energy = { payload: msg.payload.metrics.energy, topic: \"Torque Total (Nm)\" };\nvar weight = { payload: msg.payload.metrics.weight };\nvar count_cube = { payload: msg.payload.counts.cube_green };\nvar count_sphere = { payload: msg.payload.counts.sphere_blue };\n\nreturn [error, energy, weight, count_cube, count_sphere];",
+        "outputs": 5,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 240,
+        "wires": [
+            [
+                "chart_error"
+            ],
+            [
+                "chart_energy"
+            ],
+            [
+                "gauge_weight"
+            ],
+            [
+                "text_cubes"
+            ],
+            [
+                "text_spheres"
+            ]
+        ]
+    },
+    {
+        "id": "chart_error",
+        "type": "ui_chart",
+        "z": "tab_arm",
+        "name": "Gráfico Erro",
+        "group": "grp_arm_metrics",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "Erro de Posição (Estabilidade)",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "1",
+        "removeOlder": "30",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#d62728",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 630,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "chart_energy",
+        "type": "ui_chart",
+        "z": "tab_arm",
+        "name": "Gráfico Energia",
+        "group": "grp_arm_metrics",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Energia (Torque Total)",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "5000",
+        "removeOlder": "30",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#ff7f0e",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 640,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "split_state",
+        "type": "function",
+        "z": "tab_arm",
+        "name": "Estado Atual",
+        "func": "msg.payload = msg.payload.state;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 320,
+        "wires": [
+            [
+                "text_state"
+            ]
+        ]
+    },
+    {
+        "id": "text_state",
+        "type": "ui_text",
+        "z": "tab_arm",
+        "group": "grp_arm_control",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Estado Atual:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 630,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "gauge_weight",
+        "type": "ui_gauge",
+        "z": "tab_arm",
+        "name": "Peso Carga",
+        "group": "grp_arm_info",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Carga Atual (kg)",
+        "label": "kg",
+        "format": "{{value | number:2}}",
+        "min": 0,
+        "max": "2",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 630,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "text_cubes",
+        "type": "ui_text",
+        "z": "tab_arm",
+        "group": "grp_arm_info",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Cubos Verdes",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 640,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "text_spheres",
+        "type": "ui_text",
+        "z": "tab_arm",
+        "group": "grp_arm_info",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Esferas Azuis",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 640,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "json_debug",
+        "type": "debug",
+        "z": "tab_arm",
+        "name": "Debug Raw",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 390,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "grp_arm_control",
+        "type": "ui_group",
+        "name": "Controle & Status",
+        "tab": "tab_dashboard_arm",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "grp_arm_metrics",
+        "type": "ui_group",
+        "name": "Desempenho & Métricas",
+        "tab": "tab_dashboard_arm",
+        "order": 2,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "grp_arm_info",
+        "type": "ui_group",
+        "name": "Inventário",
+        "tab": "tab_dashboard_arm",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "tab_dashboard_arm",
+        "type": "ui_tab",
+        "name": "Robô Garra 1A",
+        "icon": "fa-hand-rock-o",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "0c162c240b73d8bf",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6"
+        }
+    }
+]
